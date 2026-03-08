@@ -147,8 +147,8 @@
             resultDiv.style.display = 'none';
 
             try {
-                // Menghubungi API Cobalt yang terbukti AKTIF dari hasil Termux-mu
-                const response = await fetch("https://cobalt-api.ayo.tf/api/json", {
+                // 🔥 Minta tolong ke Cloudflare Worker milikmu sebagai agen perantara
+                const response = await fetch("https://share-adixtream.gokilmichat.workers.dev/api/download", {
                     method: "POST",
                     headers: {
                         "Accept": "application/json",
@@ -156,7 +156,8 @@
                     },
                     body: JSON.stringify({
                         url: urlInput, // Link video yang dikirim user
-                        vQuality: "720", // Resolusi video
+                        vQuality: "720", // Resolusi video API v7
+                        videoQuality: "720", // Resolusi video API v10
                         isAudioOnly: false
                     })
                 });
@@ -172,10 +173,10 @@
                 else if (data && data.text) {
                      alert("Gagal memproses: " + data.text);
                 } else {
-                    alert("Terjadi kesalahan yang tidak diketahui.");
+                    alert("Terjadi kesalahan yang tidak diketahui dari server.");
                 }
             } catch (error) {
-                alert("Waduh, koneksi ke server Cobalt gagal bro. Coba lagi nanti ya.");
+                alert("Waduh, gagal terhubung ke server perantara (Cloudflare). Coba lagi nanti ya.");
                 console.error("Error Detail:", error);
             } finally {
                 // Kembalikan tombol seperti semula setelah selesai/gagal
