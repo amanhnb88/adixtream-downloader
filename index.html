@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdiXtream Downloader</title>
+    <style>
+        /* Gaya Tampilan (CSS) - Tema Dark Mode Modern */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #0f172a; /* Warna latar gelap */
+            color: #f8fafc; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .container { 
+            background: #1e293b; 
+            padding: 2.5rem; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5); 
+            width: 90%; 
+            max-width: 500px; 
+            text-align: center; 
+        }
+        h1 { 
+            margin-top: 0; 
+            color: #38bdf8; /* Warna biru muda AdiXtream */
+            font-size: 1.8rem;
+        }
+        p { 
+            color: #94a3b8; 
+            margin-bottom: 2rem; 
+            font-size: 0.95rem;
+        }
+        input { 
+            width: calc(100% - 30px); 
+            padding: 14px 15px; 
+            border: 2px solid #334155; 
+            border-radius: 10px; 
+            background: #0f172a; 
+            color: white; 
+            margin-bottom: 1.5rem; 
+            font-size: 1rem; 
+            outline: none; 
+            transition: border-color 0.3s;
+        }
+        input:focus { 
+            border-color: #38bdf8; 
+        }
+        button { 
+            background: #0ea5e9; 
+            color: white; 
+            border: none; 
+            padding: 14px 24px; 
+            border-radius: 10px; 
+            font-size: 1rem; 
+            font-weight: bold;
+            cursor: pointer; 
+            width: 100%; 
+            transition: background 0.3s, transform 0.1s; 
+        }
+        button:hover { 
+            background: #0284c7; 
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        #result { 
+            margin-top: 2rem; 
+            display: none; /* Disembunyikan sampai video siap */
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+        }
+        .download-btn { 
+            display: inline-block; 
+            background: #10b981; /* Warna hijau sukses */
+            color: white; 
+            text-decoration: none; 
+            padding: 12px 24px; 
+            border-radius: 8px; 
+            margin-top: 10px; 
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .download-btn:hover { 
+            background: #059669; 
+        }
+        
+        /* Animasi Loading */
+        .loader { 
+            border: 4px solid #334155; 
+            border-top: 4px solid #38bdf8; 
+            border-radius: 50%; 
+            width: 35px; 
+            height: 35px; 
+            animation: spin 1s linear infinite; 
+            margin: 0 auto; 
+            display: none; 
+        }
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>AdiXtream Downloader</h1>
+        <p>Unduh video dari YouTube, TikTok, IG, dll. Tanpa iklan & tanpa watermark!</p>
+        
+        <input type="url" id="videoUrl" placeholder="Tempel link video di sini (contoh: link YouTube)..." required>
+        
+        <button id="submitBtn" onclick="downloadVideo()">Dapatkan Video MP4</button>
+        
+        <div class="loader" id="loader"></div>
+        
+        <div id="result">
+            <p id="statusText">✅ Video berhasil diproses!</p>
+            <a id="downloadLink" class="download-btn" href="#" target="_blank">⬇️ Download File</a>
+        </div>
+    </div>
+
+    <script>
+        // Logika Program (JavaScript)
+        async function downloadVideo() {
+            const urlInput = document.getElementById('videoUrl').value;
+            const loader = document.getElementById('loader');
+            const resultDiv = document.getElementById('result');
+            const downloadLink = document.getElementById('downloadLink');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Cek apakah input kosong
+            if (!urlInput) {
+                alert("Masukkan link video dulu bro!");
+                return;
+            }
+
+            // Ubah tampilan saat sedang memproses
+            submitBtn.style.display = 'none';
+            loader.style.display = 'block';
+            resultDiv.style.display = 'none';
+
+            try {
+                // Menghubungi "Dapur" Cobalt (API Utama Cobalt)
+                const response = await fetch("https://api.cobalt.tools/api/json", {
+                    method: "POST",
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        url: urlInput, // Link video yang dikirim user
+                        vQuality: "720", // Resolusi video (bisa diubah)
+                        isAudioOnly: false
+                    })
+                });
+
+                const data = await response.json();
+
+                // Jika berhasil mendapatkan link MP4
+                if (data && data.url) {
+                    downloadLink.href = data.url;
+                    resultDiv.style.display = 'block'; // Tampilkan tombol download
+                } 
+                // Jika URL tidak didukung atau ada error dari Cobalt
+                else if (data && data.text) {
+                     alert("Gagal memproses: " + data.text);
+                } else {
+                    alert("Terjadi kesalahan yang tidak diketahui.");
+                }
+            } catch (error) {
+                alert("Waduh, koneksi ke server Cobalt gagal bro. Periksa internetmu atau coba lagi nanti.");
+                console.error("Error Detail:", error);
+            } finally {
+                // Kembalikan tombol seperti semula setelah selesai/gagal
+                submitBtn.style.display = 'block';
+                loader.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
